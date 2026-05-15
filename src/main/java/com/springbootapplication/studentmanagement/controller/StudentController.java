@@ -58,4 +58,9 @@ public class StudentController {
         Optional<StudentResponseDTO> foundByName = service.findStudentByName(name);
         return ResponseEntity.ok(foundByName);
     }
+    @GetMapping(value = "/getByNameParam")
+    public ResponseEntity<Optional<StudentResponseDTO>> findByNameParam(@RequestParam @NotBlank(message = "Name can't be empty/blank") String name){
+        Optional<StudentResponseDTO> foundByNameParam = service.findStudentByName(name);
+        return ResponseEntity.ok(foundByNameParam);
+    }
 }
