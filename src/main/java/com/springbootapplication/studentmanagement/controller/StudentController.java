@@ -8,11 +8,11 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -62,5 +62,21 @@ public class StudentController {
     public ResponseEntity<Optional<StudentResponseDTO>> findByNameParam(@RequestParam @NotBlank(message = "Name can't be empty/blank") String name){
         Optional<StudentResponseDTO> foundByNameParam = service.findStudentByName(name);
         return ResponseEntity.ok(foundByNameParam);
+    }
+    @GetMapping(value = "/getAllStudents")
+    public ResponseEntity<Page<StudentResponseDTO>> getAllPages(@RequestParam(defaultValue = "0") int pageNumber,@RequestParam(defaultValue = "2") int pageSize, @RequestParam(defaultValue = "name") String sortBy,@RequestParam(defaultValue = "asc") String sortDir){
+        Page<StudentResponseDTO> students = service.getAllStudentsWithPagination(pageNumber, pageSize, sortBy, sortDir);
+        if (students.isEmpty()){
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        }
+        return ResponseEntity.ok(students);
+    }
+    @GetMapping(value = "/getAllSortedStudents")
+    public ResponseEntity<List<StudentResponseDTO>> getAllSortedStudents(@RequestParam(defaultValue = "name") String sortBy, @RequestParam(defaultValue = "asc") String sortDir){
+        List<StudentResponseDTO> sortedStudents = service.getAllSortedStudents(sortBy, sortDir);
+        if (sortedStudents.isEmpty()){
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        }
+        return ResponseEntity.ok(sortedStudents);
     }
 }

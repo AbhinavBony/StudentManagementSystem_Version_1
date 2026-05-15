@@ -9,6 +9,10 @@ import com.springbootapplication.studentmanagement.exceptions.StudentNotFound;
 import com.springbootapplication.studentmanagement.interfaces.StudentServices;
 import com.springbootapplication.studentmanagement.repository.StudentRepo;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -62,5 +66,20 @@ public class StudentServiceImpl implements StudentServices {
     public Optional<StudentResponseDTO> findStudentByName(String name) {
         Student existsByName = repo.findByName(name).orElseThrow(()-> new StudentNotFound("Student not found with name: "+ name));
         return Optional.ofNullable(this.mapper.map(existsByName, StudentResponseDTO.class));
+    }
+
+    @Override
+    public Page<StudentResponseDTO> getAllStudentsWithPagination(int pageNumber, int pageSize, String sortBy, String sortDir) {
+        Sort sort = sortDir.equalsIgnoreCase("asc")? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
+        Page<Student> students = repo.findAll(pageable);
+        return students.map(student -> mapper.map(student, StudentResponseDTO.class));
+    }
+
+    @Override
+    public List<StudentResponseDTO> getAllSortedStudents(String sortBy, String sortDir) {
+        Sort sort = sortDir.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        List<Student> sortedList = repo.findAll(sort);
+        return sortedList.stream().map(student -> mapper.map(student, StudentResponseDTO.class)).toList();
     }
 }
